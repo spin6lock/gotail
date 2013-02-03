@@ -1,8 +1,9 @@
-package main 
+package main
 
 import (
 	"testing"
 	"os"
+	"syscall"
 	"strings"
 	"github.com/howeyc/fsnotify"
 )
@@ -66,6 +67,22 @@ func TestReadLastNLines(t *testing.T){
 	}
 }
 
+func TestReadNBytes(t *testing.T){
+	name := "读取从X到Y的字节"
+	filename := "/tmp/test.log"
+	TestString := "abcdefghijk"
+	content := []byte(TestString)
+	fo, _ := os.Create(filename)
+	_, _ = fo.Write(content)
+	bytes := ReadNBytes(filename, 4, 9)
+	if string(bytes) != TestString[4:10]{
+		t.Error(name)
+		t.Error(string(bytes), "!=", TestString[4:10])
+	}else{
+		t.Log(name)
+	}
+}
+
 func TestFileMonitor(t *testing.T){
 	fh, err := os.Create("test.log")
 	defer fh.Close()
@@ -86,18 +103,19 @@ func TestFileMonitor(t *testing.T){
 	}
 }
 
-func TestReadNBytes(t *testing.T){
-	name := "读取从X到Y的字节"
-	filename := "/tmp/test.log"
-	TestString := "abcdefghijk"
-	content := []byte(TestString)
-	fo, _ := os.Create(filename)
-	_, _ = fo.Write(content)
-	bytes := ReadNBytes(filename, 4, 9)
-	if string(bytes) != TestString[4:10]{
-		t.Error(name)
-		t.Error(string(bytes), "!=", TestString[4:10])
-	}else{
-		t.Log(name)
+func TestTruncateOp(t *testing.T){
+	fh, _ := os.Create("test.log")
+	defer fh.Close()
+	out := make(chan []string)
+	watcher, _ := fsnotify.NewWatcher()
+	MonitorFile("test.log", out, watcher)
+	fh.WriteString("hello world")
+	fh.Sync()
+	fh, _ = os.OpenFile("test.log", syscall.O_TRUNC, 0666)
+	fh.WriteString("hello")
+	fh.Sync()
+	if result := <-out; result[0] != "hello world"{
+		t.Error("File Truncate fail")
+		t.Error(result, "!=", "hello world")
 	}
 }

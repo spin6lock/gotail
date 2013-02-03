@@ -61,9 +61,12 @@ func MonitorFile(filename string, out chan []string,
 		for {
 			select {
 			case ev := <-watcher.Event:
-				log.Println("event:", ev)
 				if ev.IsModify(){
 					NewSize := GetFileSize(ev.Name)
+					if (NewSize <= size){
+						MonitorFile(ev.Name, out, watcher)
+						return
+					}
 					content := ReadNBytes(ev.Name, size,
 						NewSize - 1)
 					size = NewSize
@@ -74,7 +77,6 @@ func MonitorFile(filename string, out chan []string,
 			}
 		}
 	}()
-
 	err := watcher.Watch(filename)
 	if err != nil {
 		log.Fatal(err)
