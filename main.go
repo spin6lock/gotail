@@ -26,20 +26,28 @@ func ByteArrayToMultiLines(bytes []byte) []string{
 	return strings.Split(lines, "\n")
 }
 
+func ReadNBytes(filename string, start int, end int) []byte{
+	fh, _ := os.Open(filename)
+	defer fh.Close()
+	fh.Seek(int64(start), 0)
+	size := end - start + 1
+	buff := make([]byte, size)
+	fh.Read(buff)
+	return buff
+}
+
 func ReadLastNLines(name string, n int) ([]string, error){
-	fh, _ := os.Open(name)
 	curr := GetFileSize(name)
+	var end int
 	count := n
-	buff := make([]byte, n)
 	result := make([]byte, n)
 	for count > 0 && curr != 0{
 		curr -= n
+		end = curr + n - 1
 		if curr < 0 {
-			buff = make([]byte, n + curr)
 			curr = 0
 		}
-		fh.Seek(int64(curr), 0)
-		_, _ = fh.Read(buff)
+		buff := ReadNBytes(name, curr, end)
 		result = append(buff, result...)
 		count -= LineCount(buff)
 	}

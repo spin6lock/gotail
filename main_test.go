@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 	"os"
-	"time"
+//	"time"
 	"strings"
 )
 
@@ -66,6 +66,7 @@ func TestReadLastNLines(t *testing.T){
 	}
 }
 
+/*
 func TestFileMonitor(t *testing.T){
 	fh, err := os.Create("test.log")
 	if err != nil {
@@ -75,5 +76,22 @@ func TestFileMonitor(t *testing.T){
 	ticker := time.Tick(1 * time.Second)
 	for now := range ticker{
 		fh.WriteString(now.String())
+	}
+}
+*/
+
+func TestReadNBytes(t *testing.T){
+	name := "读取从X到Y的字节"
+	filename := "/tmp/test.log"
+	TestString := "abcdefghijk"
+	content := []byte(TestString)
+	fo, _ := os.Create(filename)
+	_, _ = fo.Write(content)
+	bytes := ReadNBytes(filename, 4, 9)
+	if string(bytes) != TestString[4:10]{
+		t.Error(name)
+		t.Error(string(bytes), "!=", TestString[4:10])
+	}else{
+		t.Log(name)
 	}
 }
