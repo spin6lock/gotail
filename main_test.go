@@ -72,12 +72,12 @@ func TestFileMonitor(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	out := make(chan string)
+	out := make(chan []string)
 	watcher, err := fsnotify.NewWatcher()
 	MonitorFile("test.log", out, watcher)
 	fh.WriteString("hello world")
 	fh.Sync()
-	if result := <-out; result != "hello world"{
+	if result := <-out; result[0] != "hello world"{
 		t.Error("File Modify Monitor fail")
 		t.Error(result, "!=", "hello world")
 	}else{

@@ -54,7 +54,7 @@ func ReadLastNLines(name string, n int) ([]string, error){
 	return ByteArrayToMultiLines(result), nil
 }
 
-func MonitorFile(filename string, out chan string,
+func MonitorFile(filename string, out chan []string,
 	watcher *fsnotify.Watcher){
 	size := GetFileSize(filename)
 	go func(){
@@ -63,11 +63,11 @@ func MonitorFile(filename string, out chan string,
 			case ev := <-watcher.Event:
 				log.Println("event:", ev)
 				if ev.IsModify(){
-					NewSize := GetFileSize(filename)
-					content := ReadNBytes(filename, size,
+					NewSize := GetFileSize(ev.Name)
+					content := ReadNBytes(ev.Name, size,
 						NewSize - 1)
 					size = NewSize
-					out <- string(content)
+					out <- ByteArrayToMultiLines(content)
 				}
 			case err := <-watcher.Error:
 				log.Println("error:", err)
@@ -81,13 +81,27 @@ func MonitorFile(filename string, out chan string,
 	}
 }
 
+func PrintMultiLines(lines []string){
+	for _, line := range lines{
+		fmt.Println(line)
+	}
+}
+
 func main(){
 	filename := "test.log"
 	result, _ := ReadLastNLines(filename, 10)
-	fmt.Println(result)
+	PrintMultiLines(result)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
+	}
+	out := make(chan []string)
+	MonitorFile(filename, out, watcher)
+	for{
+		select{
+		case lines := <-out:
+			PrintMultiLines(lines)
+		}
 	}
 	watcher.Close()
 }
