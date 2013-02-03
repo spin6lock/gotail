@@ -1,24 +1,24 @@
 package main
 
 import (
-	"testing"
-	"os"
-	"syscall"
-	"strings"
 	"github.com/howeyc/fsnotify"
+	"os"
+	"strings"
+	"syscall"
+	"testing"
 )
 
-func TestLineCount(t *testing.T){
+func TestLineCount(t *testing.T) {
 	name := "字节数组行统计"
 	lines := []byte("hello\nworld\n")
 	if i := LineCount(lines); i != 2 {
 		t.Error(name)
-	}else{
+	} else {
 		t.Log(name)
 	}
 }
 
-func TestFileByteRead(t *testing.T){
+func TestFileByteRead(t *testing.T) {
 	name := "获取文件大小"
 	filename := "/tmp/test.log"
 	content := []byte("abcdefghij")
@@ -26,14 +26,14 @@ func TestFileByteRead(t *testing.T){
 	_, _ = fo.Write(content)
 	fo.Close()
 	fileSize := GetFileSize(filename)
-	if fileSize != len(content){
+	if fileSize != len(content) {
 		t.Error(name)
-	}else{
+	} else {
 		t.Log(name)
 	}
 }
 
-func TestByteArrayToMultiLines(t *testing.T){
+func TestByteArrayToMultiLines(t *testing.T) {
 	name := "多个字节数组到多行字符串"
 	a := []byte("happy ")
 	b := []byte("spring\n")
@@ -41,14 +41,14 @@ func TestByteArrayToMultiLines(t *testing.T){
 	b = append(a, b...)
 	d := append(b, c...)
 	lines := ByteArrayToMultiLines(d)
-	if len(lines) != 3{
+	if len(lines) != 3 {
 		t.Error(name)
 	} else {
 		t.Log(name)
 	}
 }
 
-func TestReadLastNLines(t *testing.T){
+func TestReadLastNLines(t *testing.T) {
 	name := "测试最后n行字符串读取"
 	filename := "/tmp/test.log"
 	TestString := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
@@ -67,7 +67,7 @@ func TestReadLastNLines(t *testing.T){
 	}
 }
 
-func TestReadNBytes(t *testing.T){
+func TestReadNBytes(t *testing.T) {
 	name := "读取从X到Y的字节"
 	filename := "/tmp/test.log"
 	TestString := "abcdefghijk"
@@ -75,15 +75,15 @@ func TestReadNBytes(t *testing.T){
 	fo, _ := os.Create(filename)
 	_, _ = fo.Write(content)
 	bytes := ReadNBytes(filename, 4, 9)
-	if string(bytes) != TestString[4:10]{
+	if string(bytes) != TestString[4:10] {
 		t.Error(name)
 		t.Error(string(bytes), "!=", TestString[4:10])
-	}else{
+	} else {
 		t.Log(name)
 	}
 }
 
-func TestFileMonitor(t *testing.T){
+func TestFileMonitor(t *testing.T) {
 	fh, err := os.Create("test.log")
 	defer fh.Close()
 	if err != nil {
@@ -94,16 +94,16 @@ func TestFileMonitor(t *testing.T){
 	MonitorFile("test.log", out, watcher)
 	fh.WriteString("hello world")
 	fh.Sync()
-	if result := <-out; result[0] != "hello world"{
+	if result := <-out; result[0] != "hello world" {
 		t.Error("File Modify Monitor fail")
 		t.Error(result, "!=", "hello world")
-	}else{
+	} else {
 		t.Log("File Modify Monitor")
 		t.Log(result)
 	}
 }
 
-func TestTruncateOp(t *testing.T){
+func TestTruncateOp(t *testing.T) {
 	fh, _ := os.Create("test.log")
 	defer fh.Close()
 	out := make(chan []string)
@@ -114,7 +114,7 @@ func TestTruncateOp(t *testing.T){
 	fh, _ = os.OpenFile("test.log", syscall.O_TRUNC, 0666)
 	fh.WriteString("hello")
 	fh.Sync()
-	if result := <-out; result[0] != "hello world"{
+	if result := <-out; result[0] != "hello world" {
 		t.Error("File Truncate fail")
 		t.Error(result, "!=", "hello world")
 	}

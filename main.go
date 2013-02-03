@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
 	"os"
 	"fmt"
+	"log"
 	"flag"
 	"bytes"
 	"strings"
@@ -16,18 +16,18 @@ func LineCount(lines []byte) int {
 
 func GetFileSize(filename string) int {
 	fileInfo, err := os.Stat(filename)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 	return int(fileInfo.Size())
 }
 
-func ByteArrayToMultiLines(bytes []byte) []string{
+func ByteArrayToMultiLines(bytes []byte) []string {
 	lines := string(bytes)
 	return strings.Split(lines, "\n")
 }
 
-func ReadNBytes(filename string, start int, end int) []byte{
+func ReadNBytes(filename string, start int, end int) []byte {
 	fh, _ := os.Open(filename)
 	defer fh.Close()
 	fh.Seek(int64(start), 0)
@@ -37,12 +37,12 @@ func ReadNBytes(filename string, start int, end int) []byte{
 	return buff
 }
 
-func ReadLastNLines(name string, n int) ([]string, error){
+func ReadLastNLines(name string, n int) ([]string, error) {
 	curr := GetFileSize(name)
 	var end int
 	count := n
 	result := make([]byte, n)
-	for count > 0 && curr != 0{
+	for count > 0 && curr != 0 {
 		curr -= n
 		end = curr + n - 1
 		if curr < 0 {
@@ -56,20 +56,20 @@ func ReadLastNLines(name string, n int) ([]string, error){
 }
 
 func MonitorFile(filename string, out chan []string,
-	watcher *fsnotify.Watcher){
+	watcher *fsnotify.Watcher) {
 	size := GetFileSize(filename)
-	go func(){
+	go func() {
 		for {
 			select {
 			case ev := <-watcher.Event:
-				if ev.IsModify(){
+				if ev.IsModify() {
 					NewSize := GetFileSize(ev.Name)
-					if (NewSize <= size){
+					if NewSize <= size {
 						MonitorFile(ev.Name, out, watcher)
 						return
 					}
 					content := ReadNBytes(ev.Name, size,
-						NewSize - 1)
+						NewSize-1)
 					size = NewSize
 					out <- ByteArrayToMultiLines(content)
 				}
@@ -84,8 +84,8 @@ func MonitorFile(filename string, out chan []string,
 	}
 }
 
-func PrintMultiLines(lines []string){
-	for _, line := range lines{
+func PrintMultiLines(lines []string) {
+	for _, line := range lines {
 		fmt.Println(line)
 	}
 }
@@ -97,10 +97,10 @@ var usage = func() {
 	os.Exit(2)
 }
 
-func main(){
+func main() {
 	flag.Usage = usage
 	flag.Parse()
-	if len(flag.Args()) < 1{
+	if len(flag.Args()) < 1 {
 		usage()
 	}
 	watcher, err := fsnotify.NewWatcher()
@@ -113,8 +113,8 @@ func main(){
 		PrintMultiLines(result)
 		MonitorFile(name, out, watcher)
 	}
-	for{
-		select{
+	for {
+		select {
 		case lines := <-out:
 			fmt.Print(strings.Join(lines, "\n"))
 		}
