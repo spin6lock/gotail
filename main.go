@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
-	"bytes"
 	"os"
 	"fmt"
+	"flag"
+	"bytes"
 	"strings"
 	"github.com/howeyc/fsnotify"
 )
@@ -89,20 +90,33 @@ func PrintMultiLines(lines []string){
 	}
 }
 
+var usage = func() {
+	fmt.Fprintf(os.Stderr,
+		"Usage: gotail [FILE]...\n")
+	flag.PrintDefaults()
+	os.Exit(2)
+}
+
 func main(){
-	filename := "test.log"
-	result, _ := ReadLastNLines(filename, 10)
-	PrintMultiLines(result)
+	flag.Usage = usage
+	flag.Parse()
+	if len(flag.Args()) < 1{
+		usage()
+	}
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
 	}
 	out := make(chan []string)
-	MonitorFile(filename, out, watcher)
+	for _, name := range flag.Args() {
+		result, _ := ReadLastNLines(name, 10)
+		PrintMultiLines(result)
+		MonitorFile(name, out, watcher)
+	}
 	for{
 		select{
 		case lines := <-out:
-			PrintMultiLines(lines)
+			fmt.Print(strings.Join(lines, "\n"))
 		}
 	}
 	watcher.Close()
