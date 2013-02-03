@@ -9,7 +9,7 @@ import (
 )
 
 func TestLineCount(t *testing.T) {
-	name := "字节数组行统计"
+	name := "Count line number in []byte"
 	lines := []byte("hello\nworld\n")
 	if i := LineCount(lines); i != 2 {
 		t.Error(name)
@@ -19,7 +19,7 @@ func TestLineCount(t *testing.T) {
 }
 
 func TestFileByteRead(t *testing.T) {
-	name := "获取文件大小"
+	name := "Get file size"
 	filename := "/tmp/test.log"
 	content := []byte("abcdefghij")
 	fo, _ := os.Create(filename)
@@ -34,7 +34,7 @@ func TestFileByteRead(t *testing.T) {
 }
 
 func TestByteArrayToMultiLines(t *testing.T) {
-	name := "多个字节数组到多行字符串"
+	name := "Byte array to multiple strings"
 	a := []byte("happy ")
 	b := []byte("spring\n")
 	c := []byte("festival\n!")
@@ -49,7 +49,7 @@ func TestByteArrayToMultiLines(t *testing.T) {
 }
 
 func TestReadLastNLines(t *testing.T) {
-	name := "测试最后n行字符串读取"
+	name := "Read in last n lines"
 	filename := "/tmp/test.log"
 	TestString := "a\nb\nc\nd\ne\nf\ng\nh\ni\nj"
 	LineCount := len(strings.Split(TestString, "\n"))
@@ -68,7 +68,7 @@ func TestReadLastNLines(t *testing.T) {
 }
 
 func TestReadNBytes(t *testing.T) {
-	name := "读取从X到Y的字节"
+	name := "Read bytes from x to y"
 	filename := "/tmp/test.log"
 	TestString := "abcdefghijk"
 	content := []byte(TestString)
