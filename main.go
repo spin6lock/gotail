@@ -54,39 +54,40 @@ func ReadLastNLines(name string, n int) ([]string, error){
 	return ByteArrayToMultiLines(result), nil
 }
 
-func main(){
-	filename := "test.log"
-	result, _ := ReadLastNLines(filename, 10)
-	fmt.Println(result)
-	//size := GetFileSize(filename)
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ch := make(chan int)
+func MonitorFile(filename string, out chan string,
+	watcher *fsnotify.Watcher){
+	size := GetFileSize(filename)
 	go func(){
 		for {
 			select {
 			case ev := <-watcher.Event:
 				log.Println("event:", ev)
 				if ev.IsModify(){
-					//NewSize := GetFileSize(filename)
-					//read content between NewSize and size
-					//update size 
-					//print out latest line
+					NewSize := GetFileSize(filename)
+					content := ReadNBytes(filename, size,
+						NewSize - 1)
+					size = NewSize
+					out <- string(content)
 				}
 			case err := <-watcher.Error:
 				log.Println("error:", err)
 			}
 		}
-		ch <-1
 	}()
 
-	err = watcher.Watch(filename)
+	err := watcher.Watch(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
-	<-ch
+}
+
+func main(){
+	filename := "test.log"
+	result, _ := ReadLastNLines(filename, 10)
+	fmt.Println(result)
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
 	watcher.Close()
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 	"os"
-//	"time"
 	"strings"
+	"github.com/howeyc/fsnotify"
 )
 
 func TestLineCount(t *testing.T){
@@ -66,19 +66,25 @@ func TestReadLastNLines(t *testing.T){
 	}
 }
 
-/*
 func TestFileMonitor(t *testing.T){
 	fh, err := os.Create("test.log")
+	defer fh.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer fh.Close()
-	ticker := time.Tick(1 * time.Second)
-	for now := range ticker{
-		fh.WriteString(now.String())
+	out := make(chan string)
+	watcher, err := fsnotify.NewWatcher()
+	MonitorFile("test.log", out, watcher)
+	fh.WriteString("hello world")
+	fh.Sync()
+	if result := <-out; result != "hello world"{
+		t.Error("File Modify Monitor fail")
+		t.Error(result, "!=", "hello world")
+	}else{
+		t.Log("File Modify Monitor")
+		t.Log(result)
 	}
 }
-*/
 
 func TestReadNBytes(t *testing.T){
 	name := "读取从X到Y的字节"
