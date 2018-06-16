@@ -1,13 +1,13 @@
 package main
 
 import (
-	"os"
-	"fmt"
-	"log"
-	"flag"
 	"bytes"
-	"strings"
+	"flag"
+	"fmt"
 	"github.com/howeyc/fsnotify"
+	"log"
+	"os"
+	"strings"
 )
 
 func LineCount(lines []byte) int {
